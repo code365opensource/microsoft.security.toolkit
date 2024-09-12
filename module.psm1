@@ -8,3 +8,4 @@ foreach ($directory in @('Public', 'Private', '.')) {
         Get-ChildItem -Path $path -Filter "*.ps1" | ForEach-Object { . $_.FullName }
     }
 }
+

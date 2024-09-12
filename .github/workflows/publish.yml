@@ -26,13 +26,13 @@ jobs:
         env:
           nugetkey: ${{secrets.NUGETKEY}}
         run: |
-          Rename-Item -Path .\module.psd1 -NewName yourmodulename.psd1
+          Rename-Item -Path .\module.psd1 -NewName microsoft.security.toolkit.psd1
           Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-          $data = Import-PowerShellDataFile .\yourmodulename.psd1
+          $data = Import-PowerShellDataFile .\microsoft.security.toolkit.psd1
           if($data.RequiredModules) {
             $data.RequiredModules | Foreach-Object {Install-Module -Name $_.ModuleName -RequiredVersion $_.ModuleVersion }
           }
           Remove-Item -Path ".git" -Recurse -Force
           Remove-Item -Path ".github" -Recurse -Force
           Remove-Item -Path ".vscode" -Recurse -Force
-          Publish-PSResource -ApiKey $env:nugetkey -Path yourmodulename.psd1 -Repository PSGallery
+          Publish-PSResource -ApiKey $env:nugetkey -Path microsoft.security.toolkit.psd1 -Repository PSGallery
