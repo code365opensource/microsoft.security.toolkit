@@ -38,12 +38,26 @@ function New-SecurityScan {
     $file_info_shared = @{}
     $file_info_access_90days = @{}
 
-    # get all files in the folder
-    $graph_url_getItems = "https://graph.microsoft.com/v1.0/me/drive/root:/${pathOfOneDrive}:/children?select=name,id"
-    $response = Invoke-MgRestMethod -Uri $graph_url_getItems -Method GET
-    $data = $response.value
-    foreach ($file in $data) {
-        $file_info[$file.id] = $file.name
+    try {
+        # Get all files in the specified folder from OneDrive
+        $graph_url_getItems = "https://graph.microsoft.com/v1.0/me/drive/root:/${pathOfOneDrive}:/children?select=name,id"
+        $response = Invoke-MgRestMethod -Uri $graph_url_getItems -Method GET -ErrorAction Stop
+    
+        # Check if the response contains any files
+        if ($response.value -and $response.value.Count -gt 0) {
+            $data = $response.value
+            foreach ($file in $data) {
+                # Store file id and name in the dictionary
+                $file_info[$file.id] = $file.name
+            }
+        } else {
+            Write-Host "No files found in the specified folder."
+            Exit 1
+        }
+    }
+    catch {
+        Write-Host "An error occurred while retrieving files: $_"
+        Exit 1
     }
     
     # get the required information for each file
@@ -52,54 +66,115 @@ function New-SecurityScan {
     foreach ($key in $file_info.Keys) {
 
         # get sensitivity label
-        $url_sen = "$graph_baseUrl/$key/extractSensitivityLabels"
-        $response = Invoke-MgRestMethod -Uri $url_sen -Method POST
-        $data = $response.labels
-        $id = $data[0].sensitivityLabelId
-        if ($data -and $data[0].sensitivityLabelId) {
+        try{
+            $url_sen = "$graph_baseUrl/$key/extractSensitivityLabels"
+            $response = Invoke-MgRestMethod -Uri $url_sen -Method POST -ErrorAction Stop
+            $data = $response.labels
             $id = $data[0].sensitivityLabelId
-            $file_info_sensi[$file_info[$key]] = 
-                if ($id_to_display_name.ContainsKey($id)) 
-                    { $id_to_display_name[$id] } 
-                else { "Unknown" }
-        } else {
-            $file_info_sensi[$file_info[$key]] = "Unknown"
+            if ($data -and $data[0].sensitivityLabelId) {
+                $id = $data[0].sensitivityLabelId
+                $file_info_sensi[$file_info[$key]] = 
+                    if ($id_to_display_name.ContainsKey($id)) 
+                        { $id_to_display_name[$id] } 
+                    else { "General" }
+            } else {
+                $file_info_sensi[$file_info[$key]] = "General"
+            }
         }
+        catch {
+            Write-Host "An error occurred while retrieving sensitivity label: $_"
+            $file_info_sensi[$file_info[$key]] = "General"
+        }
+
     
-        # get all time analytics log
-        $url_access = "$graph_baseUrl/$key/analytics/alltime?select=access"
-        $response = Invoke-MgRestMethod -Uri $url_access -Method GET
-        $accessLog = $response.access
-        $file_info_access[$file_info[$key]] = $accessLog
+        try {
+            $url_access = "$graph_baseUrl/$key/analytics/alltime?select=access"
+            
+            $response = Invoke-MgRestMethod -Uri $url_access -Method GET -ErrorAction Stop
+            
+            $accessLog = $response.access
+            
+            if ($null -ne $accessLog) {
+                $file_info_access[$file_info[$key]] = $accessLog
+            } else {
+                $file_info_access[$file_info[$key]] = $null
+            }
+        } catch {
+            Write-Host "An error occurred while retrieving access data: $_"
+            $file_info_access[$file_info[$key]] = $null
+        }
+        
     
         # get recent 90 days analytics log
-        $startDate = (Get-Date).AddDays(-90).ToString('yyyy-MM-dd')
-        $url_access = "$graph_baseUrl/$key/getActivitiesByInterval(startDateTime='$startDate',endDateTime='',interval='month')?select=access"
-        $response = Invoke-MgRestMethod -Uri $url_access -Method GET
-        $accessLog = $response.value
-        $file_info_access_90days[$file_info[$key]] = $accessLog
+        try {
+            $startDate = (Get-Date).AddDays(-90).ToString('yyyy-MM-dd')
+            
+            $url_access = "$graph_baseUrl/$key/getActivitiesByInterval(startDateTime='$startDate',endDateTime='',interval='month')?select=access"
+            
+            $response = Invoke-MgRestMethod -Uri $url_access -Method GET -ErrorAction Stop
+            
+            $accessLog = $response.value
+            
+            if ($null -ne $accessLog) {
+                $file_info_access_90days[$file_info[$key]] = $accessLog
+            } else {
+                $file_info_access_90days[$file_info[$key]] = $null
+            }
+        } catch {
+            Write-Host "An error occurred while retrieving access data: $_"
+            $file_info_access_90days[$file_info[$key]] = $null
+        }
+        
     
         # get permissions
-        $url_permission = "$graph_baseUrl/$key/permissions?select=grantedToIdentitiesV2,grantedToV2,link,roles"
-        $response = Invoke-MgRestMethod -Uri $url_permission  -Method GET
-        $useName = New-Object 'System.Collections.Generic.HashSet[System.String]'
-        $scope = @{}
-        $owner = "N/A"
-        foreach ($item in $response.value) {
-            Get-Permission -entry $item -user_name ([ref]$useName) -scope $scope -owner ([ref]$owner)
+        try {
+            $url_userNum = "$graph_baseUrl/$key/permissions?count=true&top=0"
+            $response_userNum = Invoke-MgRestMethod -Uri $url_userNum -Method GET -ErrorAction Stop
+            $userNum = $response_userNum['@odata.count']
+            
+            $url_linkNum = "$graph_baseUrl/$key/permissions?filter=link/scope eq 'organization' or link/scope eq 'anonymous'&count=true&top=0"
+            $response_linkNum = Invoke-MgRestMethod -Uri $url_linkNum -Method GET -ErrorAction Stop
+            $linkNum = $response_linkNum['@odata.count']
+            
+            $url_owner = "$graph_baseUrl/$key/permissions?filter=roles/any(property:property eq 'owner')&select=grantedToV2,roles"
+            $response_owner = Invoke-MgRestMethod -Uri $url_owner -Method GET -ErrorAction Stop
+            if ($response_owner.value -and $response_owner.value[0] -and $response_owner.value[0].grantedToV2.user.email) {
+                $owner = $response_owner.value[0].grantedToV2.user.email
+            } else {
+                $owner = $null
+            }
+
+            $file_info_permission[$file_info[$key]] = $userNum
+            $file_info_scope[$file_info[$key]] = $linkNum
+        
+        } catch {
+            Write-Host "An error occurred while retrieving permission data: $_"
+            $file_info_permission[$file_info[$key]] = -1
+            $file_info_scope[$file_info[$key]] = -1
+            $owner = $null
         }
-        $file_info_permission[$file_info[$key]] = $useName.Count
-        $file_info_scope[$file_info[$key]] = $scope
     
         # get activities log
-        $url_activities = "$graph_baseUrl/$key/activities?select=action,actor"
-        $response = Invoke-MgRestMethod -Uri $url_activities -Method GET
-        $shared = $false
-        foreach ($item in $response.value) {
-            Get-Activity -entry $item -shared ([ref]$shared)
-            if($shared) {break}
-        }
-        $file_info_shared[$file_info[$key]] = $shared
+        try {
+            $url_activities = "$graph_baseUrl/$key/activities?select=action,actor"
+            
+            $response = Invoke-MgRestMethod -Uri $url_activities -Method GET -ErrorAction Stop
+            
+            $shared = $false
+            
+            foreach ($item in $response.value) {
+                Get-Activity -entry $item -shared ([ref]$shared)
+                if ($shared) {
+                    break
+                }
+            }
+            
+            $file_info_shared[$file_info[$key]] = $shared
+        
+        } catch {
+            Write-Host "An error occurred while retrieving activity data: $_"
+            $file_info_shared[$file_info[$key]] = $null
+        }        
     }
     
     $timestamp = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")

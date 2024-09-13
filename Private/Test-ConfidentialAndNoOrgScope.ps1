@@ -1,15 +1,11 @@
 function Test-ConfidentialAndNoOrgScope {
     param (
-        [hashtable]$scope,
+        [int]$scope,
         [String]$sensitivity
     )
 
-    if ($sensitivity.ToLower().Contains('confidential')) {
-        foreach ($key in $scope.Keys) { 
-            if ($key -match "organization" -or $key -match "anonymous") {
-                return $false
-            }
-        }
+    if ($sensitivity.ToLower().Contains('confidential') -and $scope -gt 0) {
+        return $false
     }
     
     return $true
