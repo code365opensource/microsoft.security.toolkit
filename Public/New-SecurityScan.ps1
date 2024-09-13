@@ -23,7 +23,7 @@ function New-SecurityScan {
 
     # connect to Microsoft Graph, if the accessToken is not provided, prompt for the access token, otherwise use the provided access token (parse it to secure string)
     if (-not $accessToken) {
-        Connect-Graph -Scopes "Files.Read","Files.Read.All" -NoWelcome
+        Connect-Graph -Scopes "Files.Read", "Files.Read.All", "InformationProtectionPolicy.Read" -NoWelcome
     }
     else {
         Connect-Graph -AccessToken (ConvertTo-SecureString $accessToken -AsPlainText -Force) -NoWelcome
@@ -61,9 +61,9 @@ function New-SecurityScan {
             $file_info_sensi[$file_info[$key]] = 
                 if ($id_to_display_name.ContainsKey($id)) 
                     { $id_to_display_name[$id] } 
-                else { "Unknown" }
+                else { "General" }
         } else {
-            $file_info_sensi[$file_info[$key]] = "Unknown"
+            $file_info_sensi[$file_info[$key]] = "General"
         }
     
         # get all time analytics log
