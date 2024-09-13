@@ -140,7 +140,5 @@ function New-SecurityScan {
     
     Write-Host "Scan report saved to: $csvFilePath"
 
-    # Output the result in Console
     $result
-
 }
