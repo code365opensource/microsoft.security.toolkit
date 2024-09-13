@@ -3,7 +3,7 @@
     RootModule           = '.\module.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.0.2'
+    ModuleVersion        = '0.0.3'
 
     # Supported PSEditions, change to Core if you just support PowerShell Core.
     CompatiblePSEditions = @("Desktop", "Core")
@@ -48,7 +48,7 @@
             ModuleName = "powershellextension"; ModuleVersion = "0.0.4"; Guid = "df717a00-1acf-45e8-a958-0c9bcb9af322"
         },
         @{
-            ModuleName = "Microsoft.Graph.Authentication"; ModuleVersion = "2.23.0"
+            ModuleName = "Microsoft.Graph.Authentication"; ModuleVersion = "2.22.0"
         })
 
     # Assemblies that must be loaded prior to importing this module

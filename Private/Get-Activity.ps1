@@ -2,6 +2,7 @@
 function Get-Activity {
     param (
         $entry,
+        $owner,
         [ref]$shared
     )
 
@@ -10,7 +11,7 @@ function Get-Activity {
 
         if ($action.ContainsKey('share')) {
             $email = $entry.actor.user.email
-            if ($email -ne $owner) {
+            if ($email -ne $owner -and $owner -ne $null) {
                 $shared.Value = $true
                 return
             }

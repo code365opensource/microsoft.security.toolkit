@@ -4,6 +4,10 @@ function Test-UnusedWithPermissions {
         [int]$permissionCount
     )
 
+    if ($accessLog90days -eq $null -or $permissionCount -lt 0) {
+        return 2
+    }
+
     $sumActionCount = 0
 
     foreach ($log in $accessLog90days) {
@@ -12,8 +16,8 @@ function Test-UnusedWithPermissions {
     }
 
     if ($sumActionCount -eq 0 -and $permissionCount -gt 1) {
-        return $false
+        return 1
     }
 
-    return $true
+    return 0
 }

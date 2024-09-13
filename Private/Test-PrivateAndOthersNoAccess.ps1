@@ -4,8 +4,11 @@ function Test-PrivateAndOthersNoAccess {
         [hashtable]$accessLog
     )
 
-    if ($permissionCount -lt 2 -and $accessLog["actorCount"] -gt 1) {
-        return $false
+    if ($permissionCount -gt 2 -or $permissionCount -lt 0 -or $accessLog -eq $null) {
+        return 2
     }
-    return $true
+    if ($accessLog["actorCount"] -lt 2) {
+        return 1
+    }
+    return 0
 }

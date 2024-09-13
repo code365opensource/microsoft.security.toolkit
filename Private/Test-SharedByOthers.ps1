@@ -1,6 +1,12 @@
 function Test-SharedByOthers {
     param (
-        [bool]$sharedWithOthers
+        $sharedWithOthers
     )
-    return -not $sharedWithOthers
+    if ($null -eq $sharedWithOthers) {
+        return 2
+    }
+    if ($sharedWithOthers) {
+        return 0
+    }
+    return 1
 }
