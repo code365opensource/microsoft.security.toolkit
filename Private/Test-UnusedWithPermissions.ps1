@@ -16,8 +16,8 @@ function Test-UnusedWithPermissions {
     }
 
     if ($sumActionCount -eq 0 -and $permissionCount -gt 1) {
-        return 1
+        return 0
     }
 
-    return 0
+    return 1
 }
