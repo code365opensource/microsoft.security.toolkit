@@ -194,7 +194,6 @@ function New-SecurityScan {
     foreach ($key in $file_info.Keys) {
         $fileName = $file_info[$key]
         $sensitivity = $file_info_sensi[$fileName]
-        Write-Host $fileName $sensitivity
         $accessLog = $file_info_access[$fileName]
         $accessLog90days = $file_info_access_90days[$fileName]
         $permissionCount = $file_info_permission[$fileName]
