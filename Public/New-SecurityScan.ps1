@@ -23,7 +23,7 @@ function New-SecurityScan {
 
     # connect to Microsoft Graph, if the accessToken is not provided, prompt for the access token, otherwise use the provided access token (parse it to secure string)
     if (-not $accessToken) {
-        Connect-Graph -Scopes "Files.Read", "Files.Read.All", "InformationProtectionPolicy.Read" -NoWelcome
+        Connect-Graph -Scopes "Files.Read.All", "InformationProtectionPolicy.Read" -NoWelcome
     }
     else {
         Connect-Graph -AccessToken (ConvertTo-SecureString $accessToken -AsPlainText -Force) -NoWelcome
@@ -194,7 +194,6 @@ function New-SecurityScan {
     foreach ($key in $file_info.Keys) {
         $fileName = $file_info[$key]
         $sensitivity = $file_info_sensi[$fileName]
-        Write-Host $fileName $sensitivity
         $accessLog = $file_info_access[$fileName]
         $accessLog90days = $file_info_access_90days[$fileName]
         $permissionCount = $file_info_permission[$fileName]

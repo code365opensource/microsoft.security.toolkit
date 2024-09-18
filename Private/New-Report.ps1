@@ -111,5 +111,11 @@ function New-Report {
         Recommendation = $finalRecommendation
     }
 
+    # Display a message indicating that the report for the file has been generated
+    if ($finalResult -eq "High Risk") {
+        Write-Host "Report for $fileName has been generated with result: $finalResult" -ForegroundColor Red
+    } else {
+        Write-Host "Report for $fileName has been generated with result: $finalResult"
+    }
     return $csvData
 }
