@@ -63,7 +63,13 @@ function New-SecurityScan {
     # get the required information for each file
     $graph_baseUrl = 'https://graph.microsoft.com/v1.0/me/drive/items'
     $id_to_display_name = Get-SensitivityLabelsMapping
+    $file_count = $file_info.Keys.Count
+    $counter = 0
     foreach ($key in $file_info.Keys) {
+        # show notification for users
+        $counter++
+        $fileName = $file_info[$key]
+        Write-Host "Processing $fileName ($counter of $file_count files)..."
 
         # get sensitivity label
         try{
@@ -184,6 +190,7 @@ function New-SecurityScan {
     $csvData = @()
     
     # generate report for each file
+    Write-Host "Generating scan report for all files..."
     foreach ($key in $file_info.Keys) {
         $fileName = $file_info[$key]
         $sensitivity = $file_info_sensi[$fileName]
