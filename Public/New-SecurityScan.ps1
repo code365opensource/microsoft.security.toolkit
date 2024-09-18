@@ -23,7 +23,7 @@ function New-SecurityScan {
 
     # connect to Microsoft Graph, if the accessToken is not provided, prompt for the access token, otherwise use the provided access token (parse it to secure string)
     if (-not $accessToken) {
-        Connect-Graph -Scopes "Files.Read", "Files.Read.All", "InformationProtectionPolicy.Read" -NoWelcome
+        Connect-Graph -Scopes "Files.Read.All", "InformationProtectionPolicy.Read" -NoWelcome
     }
     else {
         Connect-Graph -AccessToken (ConvertTo-SecureString $accessToken -AsPlainText -Force) -NoWelcome
