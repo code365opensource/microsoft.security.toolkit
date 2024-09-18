@@ -7,9 +7,6 @@ function New-Report {
         [int]$passUnusedWithPermissionsTest
     )
 
-    $csvData = @()
-
-    # Recommendation list as provided
     $recommendation_list = @(
         @{ 
             "id" = "1"; 
@@ -49,64 +46,69 @@ function New-Report {
         }
     )
 
-    # Condition-based report generation
-    if ($passPrivateAndNoAccessTest -eq 1 -and $passSharedByOthersTest -eq 1 -and $passConfidentialAndNoOrgScopeTest -eq 1 -and $passUnusedWithPermissionsTest -eq 1) {
-        # If all checks are true, generate only ID=6 (Secure)
-        $entry = $recommendation_list | Where-Object { $_.id -eq "6" }
-        $csvData += [PSCustomObject]@{
-            Path          = $fileName
-            Result        = $entry.result
-            Reason        = $entry.reason
-            Recommendation = $entry.recommendation
-        }
-    } else {
-        # If passPrivateAndNoAccessTest is true, generate ID=1; otherwise generate ID=2
-        if ($passPrivateAndNoAccessTest -ne 2) {
-            if ($passPrivateAndNoAccessTest -eq 1) {
-                $entry = $recommendation_list | Where-Object { $_.id -eq "1" }
-            }
-            else {
-                $entry = $recommendation_list | Where-Object { $_.id -eq "2" }
-            }
-            $csvData += [PSCustomObject]@{
-                Path          = $fileName
-                Result        = $entry.result
-                Reason        = $entry.reason
-                Recommendation = $entry.recommendation
-            }
-        }
-        # If passSharedByOthersTest is false, generate ID=3
-        if ($passSharedByOthersTest -eq 0) {
-            $entry = $recommendation_list | Where-Object { $_.id -eq "3" }
-            $csvData += [PSCustomObject]@{
-                Path          = $fileName
-                Result        = $entry.result
-                Reason        = $entry.reason
-                Recommendation = $entry.recommendation
-            }
-        }
+    $reasons = @()
+    $recommendations = @()
+    $results = @()
 
-        # If passConfidentialAndNoOrgScopeTest is false, generate ID=4
-        if ($passConfidentialAndNoOrgScopeTest -eq 0) {
-            $entry = $recommendation_list | Where-Object { $_.id -eq "4" }
-            $csvData += [PSCustomObject]@{
-                Path          = $fileName
-                Result        = $entry.result
-                Reason        = $entry.reason
-                Recommendation = $entry.recommendation
+    # Logic to check tests and set reasons, recommendations, results
+    foreach ($item in $recommendation_list) {
+        switch ($item.id) {
+            "1" {
+                if ($passPrivateAndNoAccessTest -eq 1) {
+                    $reasons += ($item.reason + " - " + $item.result)
+                    $recommendations += $item.recommendation
+                    $results += $item.result
+                }
+            }
+            "2" {
+                if ($passPrivateAndNoAccessTest -eq 0) {
+                    $reasons += ($item.reason + " - " + $item.result)
+                    $recommendations += $item.recommendation
+                    $results += $item.result
+                }
+            }
+            "3" {
+                if ($passSharedByOthersTest -eq 0) {
+                    $reasons += ($item.reason + " - " + $item.result)
+                    $recommendations += $item.recommendation
+                    $results += $item.result
+                }
+            }
+            "4" {
+                if ($passConfidentialAndNoOrgScopeTest -eq 0) {
+                    $reasons += ($item.reason + " - " + $item.result)
+                    $recommendations += $item.recommendation
+                    $results += $item.result
+                }
+            }
+            "5" {
+                if ($passUnusedWithPermissionsTest -eq 0) {
+                    $reasons += ($item.reason + " - " + $item.result)
+                    $recommendations += $item.recommendation
+                    $results += $item.result
+                }
             }
         }
+    }
 
-        # If passUnusedWithPermissionsTest is false, generate ID=5
-        if ($passUnusedWithPermissionsTest -eq 0) {
-            $entry = $recommendation_list | Where-Object { $_.id -eq "5" }
-            $csvData += [PSCustomObject]@{
-                Path          = $fileName
-                Result        = $entry.result
-                Reason        = $entry.reason
-                Recommendation = $entry.recommendation
-            }
-        }
+    # Aggregate results by priority
+    $finalResult = "Secure"
+    if ($results.Contains("High Risk")) {
+        $finalResult = "High Risk"
+    } elseif ($results.Contains("Low Risk")) {
+        $finalResult = "Low Risk"
+    }
+
+    # Combine reasons and recommendations
+    $finalReason = $reasons -join "`n"
+    $finalRecommendation = $recommendations -join "`n"
+
+    # Prepare final CSV object
+    $csvData = [PSCustomObject]@{
+        Path          = $fileName
+        Result        = $finalResult
+        Reason        = $finalReason
+        Recommendation = $finalRecommendation
     }
 
     return $csvData
