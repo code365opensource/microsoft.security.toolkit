@@ -9,6 +9,7 @@ Install-Module -Name microsoft.security.toolkit -Scope CurrentUser
 
 ![image](https://github.com/user-attachments/assets/b275cba1-e78d-469a-83fc-1fd5769deed0)
 
+Or Online: https://microsoftapc-my.sharepoint.com/my 
 
 ## 3.To make the magic happen in MSFT tenant, for now you need to mannully copy your accesstoken to clipboard in Graph Explorer. And then run amisecure cmd to secure your files. (Replace <YourFilePath> with your actual path.)
 
