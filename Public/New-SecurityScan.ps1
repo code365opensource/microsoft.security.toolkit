@@ -179,9 +179,7 @@ function New-SecurityScan {
     
     $timestamp = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
     $csvFileName = "scan_report_$timestamp.csv"
-    $outputPath = (Get-Location).Path + "\$csvfileName"
-
-    "This is the output" | Out-File -FilePath $outputPath
+    $csvFilePath = (Get-Location).Path + "\$csvfileName"
 
     $csvData = @()
     
