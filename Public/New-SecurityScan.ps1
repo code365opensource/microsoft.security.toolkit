@@ -179,7 +179,10 @@ function New-SecurityScan {
     
     $timestamp = (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss")
     $csvFileName = "scan_report_$timestamp.csv"
-    $csvFilePath = Join-Path -Path $PSScriptRoot -ChildPath $csvFileName
+    $outputPath = (Get-Location).Path + "\$csvfileName"
+
+    "This is the output" | Out-File -FilePath $outputPath
+
     $csvData = @()
     
     # generate report for each file
