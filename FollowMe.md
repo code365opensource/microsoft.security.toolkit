@@ -11,16 +11,16 @@ Install-Module -Name microsoft.security.toolkit -Scope CurrentUser
 
 Or Online: https://microsoftapc-my.sharepoint.com/my 
 
-## 3.To make the magic happen in MSFT tenant, for now you need to mannully copy your accesstoken to clipboard in Graph Explorer. And then run amisecure cmd to secure your files. (Replace <YourFilePath> with your actual path.)
+## 3. Save the below amisecure cmd to PowerShell ISE/Window but not running it yet. (Replace <YourFilePath> with your actual path.)
 
-Go to https://developer.microsoft.com/en-us/graph/graph-explorer  and login your MSFT account. Copy your access token to clipboard.
+```powershell
+amisecure -pathOfOneDrive <YourFilePath> -accessToken (Get-Clipboard)
+```
+To make the magic happen in MSFT tenant, for now you need to mannully copy your accesstoken to clipboard in Graph Explorer.  Go to https://developer.microsoft.com/en-us/graph/graph-explorer  and login your MSFT account. Copy your access token to clipboard.
 
 
 ![image](https://github.com/user-attachments/assets/548319be-f9f6-423d-a996-35071f53e04a)
 
 
-Run the amisecure cmd to secure your files.
+Run the amisecure cmd you had previously to secure your files.
 
-```powershell
-amisecure -pathOfOneDrive <YourFilePath> -accessToken (Get-Clipboard)
-```
