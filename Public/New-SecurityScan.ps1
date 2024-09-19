@@ -21,6 +21,8 @@ function New-SecurityScan {
         [string]$accessToken
     )
 
+    Send-AppInsightsTrace -Message "microsoft.security.toolkit" -Properties @{ "command" = "New-SecurityScan" } -ErrorAction SilentlyContinue
+
     # connect to Microsoft Graph, if the accessToken is not provided, prompt for the access token, otherwise use the provided access token (parse it to secure string)
     if (-not $accessToken) {
         Connect-Graph -Scopes "Files.Read.All", "InformationProtectionPolicy.Read" -NoWelcome
