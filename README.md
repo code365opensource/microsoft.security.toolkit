@@ -14,7 +14,7 @@ Install-Module -Name microsoft.security.toolkit -Scope CurrentUser -AllowPrerele
 
 ## How to use the toolkit
 
-```text
+```markdown
 NAME
     New-SecurityScan
 
@@ -45,6 +45,7 @@ PARAMETERS
         
     -accessToken <String>
         The access token to access the OneDrive folder. This is optional, if not provided, the function will prompt for the access token, please make sure your token includes two scopes - "Files.Read.All", "InformationProtectionPolicy.Read".
+        Follow the doc (https://github.com/code365opensource/microsoft.security.toolkit/blob/master/FollowMe.md) to get started.
         
         Required?                    false
         Position?                    2
@@ -61,6 +62,7 @@ PARAMETERS
 OUTPUTS
     This function will generate a report of the security issues found in the OneDrive folder, and can be export to csv.
 ```
+
 
 ## Update the module
 
