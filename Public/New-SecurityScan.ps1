@@ -42,24 +42,14 @@ function New-SecurityScan {
 
     try {
         # Get all files in the specified folder from OneDrive
-        $graph_url_getItems = "https://graph.microsoft.com/v1.0/me/drive/root:/${pathOfOneDrive}:/children?select=name,id"
-        $response = Invoke-MgRestMethod -Uri $graph_url_getItems -Method GET -ErrorAction Stop
-    
-        # Check if the response contains any files
-        if ($response.value -and $response.value.Count -gt 0) {
-            $data = $response.value
-            foreach ($file in $data) {
-                # Store file id and name in the dictionary
-                $file_info[$file.id] = $file.name
-            }
-        } else {
+        $file_info = Get-Files -FolderPath $pathOfOneDrive
+
+        if ($file_info.Count -eq 0) {
             Write-Host "No files found in the specified folder."
-            Exit 1
         }
     }
     catch {
         Write-Host "An error occurred while retrieving files: $_"
-        Exit 1
     }
     
     # get the required information for each file
